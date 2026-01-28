@@ -10,11 +10,11 @@
 1. Cloner le repo : 
 2. Vérifier avec maven
 ````shell
-mvnw verify
+./mvnw verify
 ````
 3. Packager avec maven
 ````shell
-mvnw package
+./mvnw package
 ````
 4. Lancer le jar
 ````shell
