@@ -12,6 +12,11 @@ public class GreetingController {
   private static final String template = "Hello, %s!";
   private final AtomicLong counter = new AtomicLong();
 
+  @GetMapping("/")
+  public String home() {
+    return "Welcome to JRPG API";
+  }
+
   @GetMapping("/greeting")
   public GreetingRecord greeting(@RequestParam(defaultValue = "World") String name) {
     return new GreetingRecord(counter.incrementAndGet(), template.formatted(name));
