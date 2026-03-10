@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GreetingController {
 
-  private static final String template = "Hello, %s!";
+  private static final String TEMPLATE = "Hello, %s!";
   private final AtomicLong counter = new AtomicLong();
 
   @GetMapping("/")
@@ -19,6 +19,6 @@ public class GreetingController {
 
   @GetMapping("/greeting")
   public GreetingRecord greeting(@RequestParam(defaultValue = "World") String name) {
-    return new GreetingRecord(counter.incrementAndGet(), template.formatted(name));
+    return new GreetingRecord(counter.incrementAndGet(), TEMPLATE.formatted(name));
   }
 }
