@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GreetingRepository
-    extends MongoRepository<GreetingRecord, String> {}
+  extends MongoRepository<GreetingRecord, String> {}
