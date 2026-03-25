@@ -1,3 +1,7 @@
 package com.mds.jrpg.greeting;
 
-public record GreetingRecord(long id, String content) { }
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "greetings")
+public record GreetingRecord(@Id String id, long counter, String content) {}
