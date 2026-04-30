@@ -1,13 +1,21 @@
 # JavaRPG
-
 ## Installation
-### Dépendances
-- Java version : ``25.0.1``
-- JVM runner : ``Eclipse Temurin``
-- Build tool : ``Maven``
-
-### Lancer le projet (dev)
+### Lancer le projet
 1. Cloner le repo : <url> repo
+#### Avec Docker (recommandé)
+##### Dépendances
+> - Docker avec compose
+2. à la racine du projet, lancer la commande pour assembler et ***lancer le projet***
+````shell
+docker compose up
+````
+---
+#### Sans docker (si la commande du dessus ne fonctionne pas)
+##### Dépendances
+> - Java version : ``25.0.1``
+> - JVM runner : ``Eclipse Temurin``
+> - Build tool : ``Maven``
+
 2. Vérifier avec maven
 ````shell
 ./mvnw verify
