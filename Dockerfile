@@ -3,7 +3,7 @@ FROM eclipse-temurin:25 AS builder
 ENV APP_HOME=/usr/jrpg
 RUN mkdir -p $APP_HOME
 WORKDIR $APP_HOME
-ADD . $APP_HOME
+ADD ./backend $APP_HOME
 RUN ./mvnw -f $APP_HOME/pom.xml clean package
 
 # Phase d'exécution
