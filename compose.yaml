@@ -31,4 +31,4 @@ services:
 
 networks:
   jrpg-network:
-    driver: bridge
+    external: false

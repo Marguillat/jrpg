@@ -10,7 +10,7 @@ import { useGameStore } from '@/stores/gameStore';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { BattleLogViewer } from '@/components/battle/BattleLogViewer';
-import { BattleResultDTO, MonsterResponseDTO } from '@/types/api';
+import { BattleResultDTO, CharacterResponseDTO, MonsterResponseDTO } from '@/types/api';
 import { Swords, AlertCircle, Heart, Sparkles, Trophy, PlusCircle } from 'lucide-react';
 
 const defaultMonsters = [
@@ -29,7 +29,7 @@ export default function AdventurePage() {
   const [isSeeding, setIsSeeding] = useState(false);
 
   // Récupère l'aventurier actif
-  const { data: activeCharacter, isLoading: isLoadingChar } = useQuery({
+  const { data: activeCharacter, isLoading: isLoadingChar } = useQuery<CharacterResponseDTO | undefined>({
     queryKey: queryKeys.characters.detail(activeCharacterId || ''),
     queryFn: () => characterService.getById(activeCharacterId || ''),
     enabled: !!activeCharacterId,
@@ -230,7 +230,7 @@ export default function AdventurePage() {
                 onClick={handleStartBattle}
                 isLoading={battleMutation.isPending}
                 className="gap-2 font-bold w-full md:w-auto"
-                disabled={activeCharacter.stats.currentHealth <= 0}
+                disabled={(activeCharacter?.stats?.currentHealth ?? 0) <= 0}
               >
                 <Swords className="h-5 w-5" />
                 Lancer le combat contre {selectedMonster.name}

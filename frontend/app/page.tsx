@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Swords, Shield, Scroll, Sparkles, BookOpen, Flame } from 'lucide-react';
 
-export default function LandingPage() {
+export default function Home() {
   const classes = [
     {
       name: 'Guerrier',
@@ -153,7 +153,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-white border-t border-card-border/60 py-8 text-center text-xs text-[#393E41]/75 font-sans">
-        <p>© 2026 JRPG. Développé conformément à la charte CRAFT.</p>
+        <p>© 2026 JRPG.</p>
       </footer>
     </div>
   );
