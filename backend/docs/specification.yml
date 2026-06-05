@@ -1,0 +1,922 @@
+openapi: 3.0.0
+info:
+  title: JRPG API
+  description: REST API for a Turn-Based RPG Game with Character Management, Items, Monsters, and Battles
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+  - url: https://api.jrpg.com
+    description: Production Server
+
+tags:
+  - name: Characters
+    description: Character management endpoints
+  - name: Items
+    description: Item and equipment management endpoints
+  - name: Monsters
+    description: Bestiary and monster management endpoints
+  - name: Battles
+    description: Combat and battle system endpoints
+
+paths:
+  /api/characters:
+    options:
+      operationId: optionsCharacters
+      tags:
+        - Characters
+      summary: Get information about the Character resource
+      description: Returns metadata about allowed methods and parameters for the Character endpoints
+      responses:
+        '200':
+          description: Metadata about the Character resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resource:
+                    type: string
+                    example: Characters
+                  allowedMethods:
+                    type: array
+                    items:
+                      type: string
+                    example: ['GET', 'POST', 'DELETE', 'OPTIONS']
+                  postParameters:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: 'String (required) - Unique name of the character'
+                      characterClass:
+                        type: string
+                        example: 'Enum (required) - WARRIOR, MAGE, ROGUE, CLERIC, PALADIN'
+                  endpoints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        path:
+                          type: string
+                        method:
+                          type: string
+                        description:
+                          type: string
+
+    get:
+      operationId: getAllCharacters
+      tags:
+        - Characters
+      summary: List all characters
+      description: Retrieves a list of all characters in the system
+      responses:
+        '200':
+          description: Successful retrieval of all characters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CharacterResponseDTO'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      operationId: createCharacter
+      tags:
+        - Characters
+      summary: Create a new character
+      description: Creates a new character with initial stats based on their class
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharacterRequestDTO'
+            example:
+              name: 'Aragorn'
+              characterClass: 'WARRIOR'
+      responses:
+        '201':
+          description: Character created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponseDTO'
+        '400':
+          description: Invalid request body or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Character name already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/characters/{id}:
+    get:
+      operationId: getCharacterById
+      tags:
+        - Characters
+      summary: Get details of a specific character
+      description: Retrieves detailed information about a specific character by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the character
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Character found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterResponseDTO'
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      operationId: deleteCharacter
+      tags:
+        - Characters
+      summary: Delete a character
+      description: Permanently removes a character from the system
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the character to delete
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Character deleted successfully
+        '404':
+          description: Character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/items:
+    options:
+      operationId: optionsItems
+      tags:
+        - Items
+      summary: Get information about the Item resource
+      description: Returns metadata about allowed methods and parameters for the Item endpoints
+      responses:
+        '200':
+          description: Metadata about the Item resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resource:
+                    type: string
+                    example: Items
+                  allowedMethods:
+                    type: array
+                    items:
+                      type: string
+                    example: ['GET', 'POST', 'OPTIONS']
+                  postParameters:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: 'String (required) - Name of the item'
+                      type:
+                        type: string
+                        example: 'Enum (required) - WEAPON, ARMOR, CONSUMABLE, QUEST_ITEM, ACCESSORY'
+                      strengthBonus:
+                        type: string
+                        example: 'int - Bonus to strength'
+                      agilityBonus:
+                        type: string
+                        example: 'int - Bonus to agility'
+                      intelligenceBonus:
+                        type: string
+                        example: 'int - Bonus to intelligence'
+                      healthBonus:
+                        type: string
+                        example: 'int - Bonus to health'
+                      manaBonus:
+                        type: string
+                        example: 'int - Bonus to mana'
+
+    get:
+      operationId: getAllItems
+      tags:
+        - Items
+      summary: List all items
+      description: Retrieves a list of all items in the system
+      responses:
+        '200':
+          description: Successful retrieval of all items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemResponseDTO'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      operationId: createItem
+      tags:
+        - Items
+      summary: Create a new item
+      description: Creates a new item that can be equipped to characters
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ItemRequestDTO'
+            example:
+              name: 'Iron Sword'
+              type: 'WEAPON'
+              strengthBonus: 5
+              agilityBonus: 0
+              intelligenceBonus: 0
+              healthBonus: 0
+              manaBonus: 0
+      responses:
+        '201':
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponseDTO'
+        '400':
+          description: Invalid request body or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/items/{id}:
+    get:
+      operationId: getItemById
+      tags:
+        - Items
+      summary: Get details of a specific item
+      description: Retrieves detailed information about a specific item by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the item
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponseDTO'
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/items/{itemId}/equip/{characterId}:
+    post:
+      operationId: equipItem
+      tags:
+        - Items
+      summary: Equip an item to a character
+      description: Equips an item to a character, granting the character the item's stat bonuses
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          description: The unique identifier of the item to equip
+          schema:
+            type: string
+        - name: characterId
+          in: path
+          required: true
+          description: The unique identifier of the character to equip the item to
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item equipped successfully
+        '400':
+          description: Invalid item or character ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Item or character not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/monsters:
+    options:
+      operationId: optionsMonsters
+      tags:
+        - Monsters
+      summary: Get information about the Monster resource
+      description: Returns metadata about allowed methods and parameters for the Monster endpoints
+      responses:
+        '200':
+          description: Metadata about the Monster resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resource:
+                    type: string
+                    example: Monsters
+                  allowedMethods:
+                    type: array
+                    items:
+                      type: string
+                    example: ['GET', 'POST', 'DELETE', 'OPTIONS']
+                  postParameters:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: 'String (required) - Name of the monster'
+                      level:
+                        type: string
+                        example: 'int (required) - Level of the monster'
+                      stats:
+                        type: string
+                        example: 'Stats (required) - Statistics object (strength, agility, etc.)'
+                      experienceValue:
+                        type: string
+                        example: 'long (required) - XP awarded when defeated'
+
+    get:
+      operationId: getAllMonsters
+      tags:
+        - Monsters
+      summary: List all monsters
+      description: Retrieves a list of all monsters in the bestiary
+      responses:
+        '200':
+          description: Successful retrieval of all monsters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MonsterResponseDTO'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      operationId: createMonster
+      tags:
+        - Monsters
+      summary: Create a new monster
+      description: Creates a new monster that can be encountered in battles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MonsterRequestDTO'
+            example:
+              name: 'Goblin'
+              level: 1
+              stats:
+                strength: 5
+                agility: 4
+                intelligence: 2
+                maxHealth: 20
+                currentHealth: 20
+                maxMana: 5
+                currentMana: 5
+              experienceValue: 50
+      responses:
+        '201':
+          description: Monster created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonsterResponseDTO'
+        '400':
+          description: Invalid request body or missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/monsters/{id}:
+    get:
+      operationId: getMonsterById
+      tags:
+        - Monsters
+      summary: Get details of a specific monster
+      description: Retrieves detailed information about a specific monster by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the monster
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Monster found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonsterResponseDTO'
+        '404':
+          description: Monster not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      operationId: deleteMonster
+      tags:
+        - Monsters
+      summary: Delete a monster
+      description: Permanently removes a monster from the bestiary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The unique identifier of the monster to delete
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Monster deleted successfully
+        '404':
+          description: Monster not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/battles/start:
+    options:
+      operationId: optionsBattles
+      tags:
+        - Battles
+      summary: Get information about the Battle resource
+      description: Returns metadata about allowed methods and parameters for the Battle endpoints
+      responses:
+        '200':
+          description: Metadata about the Battle resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resource:
+                    type: string
+                    example: Battles
+                  allowedMethods:
+                    type: array
+                    items:
+                      type: string
+                    example: ['POST', 'OPTIONS']
+                  postParameters:
+                    type: object
+                    properties:
+                      characterId:
+                        type: string
+                        example: 'String (required) - ID of the hero'
+                      monsterId:
+                        type: string
+                        example: 'String (required) - ID of the monster to fight'
+
+    post:
+      operationId: startBattle
+      tags:
+        - Battles
+      summary: Trigger a battle
+      description: Initiates a turn-based battle between a character and a monster, automatically simulating all combat turns
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BattleRequestDTO'
+            example:
+              characterId: '507f1f77bcf86cd799439011'
+              monsterId: '507f1f77bcf86cd799439012'
+      responses:
+        '200':
+          description: Battle completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BattleResultDTO'
+        '400':
+          description: Invalid character or monster ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Character or monster not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CharacterRequestDTO:
+      type: object
+      required:
+        - name
+        - characterClass
+      properties:
+        name:
+          type: string
+          description: The unique name of the character
+          example: 'Aragorn'
+        characterClass:
+          $ref: '#/components/schemas/CharacterClass'
+
+    CharacterResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique MongoDB identifier of the character
+          example: '507f1f77bcf86cd799439011'
+        name:
+          type: string
+          description: The name of the character
+          example: 'Aragorn'
+        characterClass:
+          $ref: '#/components/schemas/CharacterClass'
+        level:
+          type: integer
+          description: The current level of the character
+          example: 1
+        experience:
+          type: integer
+          description: The total experience points accumulated
+          example: 0
+        stats:
+          $ref: '#/components/schemas/Stats'
+        equippedItemIds:
+          type: array
+          description: List of IDs of equipped items
+          items:
+            type: string
+          example: ['507f1f77bcf86cd799439013', '507f1f77bcf86cd799439014']
+
+    CharacterClass:
+      type: string
+      enum:
+        - WARRIOR
+        - MAGE
+        - ROGUE
+        - CLERIC
+        - PALADIN
+      description: The character's class which determines their playstyle and stat progression
+      example: WARRIOR
+
+    Stats:
+      type: object
+      required:
+        - strength
+        - agility
+        - intelligence
+        - maxHealth
+        - currentHealth
+        - maxMana
+        - currentMana
+      properties:
+        strength:
+          type: integer
+          description: Physical damage and carrying capacity
+          example: 10
+        agility:
+          type: integer
+          description: Dodge chance and physical evasion
+          example: 8
+        intelligence:
+          type: integer
+          description: Magical power and spell effectiveness
+          example: 5
+        maxHealth:
+          type: integer
+          description: Maximum hit points
+          example: 50
+        currentHealth:
+          type: integer
+          description: Current hit points
+          example: 50
+        maxMana:
+          type: integer
+          description: Maximum mana points
+          example: 20
+        currentMana:
+          type: integer
+          description: Current mana points
+          example: 20
+
+    ItemRequestDTO:
+      type: object
+      required:
+        - name
+        - type
+        - strengthBonus
+        - agilityBonus
+        - intelligenceBonus
+        - healthBonus
+        - manaBonus
+      properties:
+        name:
+          type: string
+          description: The name of the item
+          example: 'Iron Sword'
+        type:
+          $ref: '#/components/schemas/ItemType'
+        strengthBonus:
+          type: integer
+          description: Bonus to strength stat when equipped
+          example: 5
+        agilityBonus:
+          type: integer
+          description: Bonus to agility stat when equipped
+          example: 0
+        intelligenceBonus:
+          type: integer
+          description: Bonus to intelligence stat when equipped
+          example: 0
+        healthBonus:
+          type: integer
+          description: Bonus to health stat when equipped
+          example: 0
+        manaBonus:
+          type: integer
+          description: Bonus to mana stat when equipped
+          example: 0
+
+    ItemResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique MongoDB identifier of the item
+          example: '507f1f77bcf86cd799439013'
+        name:
+          type: string
+          description: The name of the item
+          example: 'Iron Sword'
+        type:
+          $ref: '#/components/schemas/ItemType'
+        strengthBonus:
+          type: integer
+          description: Bonus to strength stat when equipped
+          example: 5
+        agilityBonus:
+          type: integer
+          description: Bonus to agility stat when equipped
+          example: 0
+        intelligenceBonus:
+          type: integer
+          description: Bonus to intelligence stat when equipped
+          example: 0
+        healthBonus:
+          type: integer
+          description: Bonus to health stat when equipped
+          example: 0
+        manaBonus:
+          type: integer
+          description: Bonus to mana stat when equipped
+          example: 0
+
+    ItemType:
+      type: string
+      enum:
+        - WEAPON
+        - ARMOR
+        - CONSUMABLE
+        - QUEST_ITEM
+        - ACCESSORY
+      description: The category of the item
+      example: WEAPON
+
+    MonsterRequestDTO:
+      type: object
+      required:
+        - name
+        - level
+        - stats
+        - experienceValue
+      properties:
+        name:
+          type: string
+          description: The name of the monster
+          example: 'Goblin'
+        level:
+          type: integer
+          description: The level of the monster
+          example: 1
+        stats:
+          $ref: '#/components/schemas/Stats'
+        experienceValue:
+          type: integer
+          description: Experience points awarded for defeating the monster
+          example: 50
+
+    MonsterResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique MongoDB identifier of the monster
+          example: '507f1f77bcf86cd799439012'
+        name:
+          type: string
+          description: The name of the monster
+          example: 'Goblin'
+        level:
+          type: integer
+          description: The level of the monster
+          example: 1
+        stats:
+          $ref: '#/components/schemas/Stats'
+        experienceValue:
+          type: integer
+          description: Experience points awarded for defeating the monster
+          example: 50
+
+    BattleRequestDTO:
+      type: object
+      required:
+        - characterId
+        - monsterId
+      properties:
+        characterId:
+          type: string
+          description: The MongoDB ID of the character participating in the battle
+          example: '507f1f77bcf86cd799439011'
+        monsterId:
+          type: string
+          description: The MongoDB ID of the monster to battle
+          example: '507f1f77bcf86cd799439012'
+
+    BattleResultDTO:
+      type: object
+      properties:
+        characterName:
+          type: string
+          description: Name of the character that participated
+          example: 'Aragorn'
+        monsterName:
+          type: string
+          description: Name of the monster that was fought
+          example: 'Goblin'
+        victory:
+          type: boolean
+          description: Whether the character won the battle
+          example: true
+        experienceGained:
+          type: integer
+          description: Experience points earned (0 if defeated)
+          example: 50
+        log:
+          type: array
+          description: Detailed turn-by-turn combat log
+          items:
+            type: string
+          example:
+            - 'Aragorn attacks Goblin for 8 damage!'
+            - 'Goblin attacks Aragorn for 3 damage!'
+            - 'Aragorn attacks Goblin for 7 damage!'
+            - 'Victory! Aragorn defeated Goblin'
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+        - timestamp
+        - errors
+      properties:
+        status:
+          type: integer
+          description: HTTP status code
+          example: 404
+        message:
+          type: string
+          description: Error message
+          example: 'Character not found'
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred
+          example: '2024-01-15T10:30:00'
+        errors:
+          type: array
+          description: List of specific error details
+          items:
+            type: string
+          example:
+            ["ID '507f1f77bcf86cd799439011' does not exist in the database"]
