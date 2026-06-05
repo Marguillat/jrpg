@@ -2,4 +2,23 @@ services:
   api:
     build: .
     ports:
-    - "8080:8080"
+      - "8080:8080"
+    environment:
+      - MONGODB_URI=mongodb://localhost:27017/jrpg
+    networks:
+      - jrpg-network
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8080
+    networks:
+      - jrpg-network
+
+networks:
+  jrpg-network:
+    driver: bridge
