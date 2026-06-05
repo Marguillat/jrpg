@@ -2,7 +2,8 @@
 ## Si tout fonctionne
 - API lancée sur le port ``8080``
 - Base de données MongoDB atlas connectée
-- Frontend lancé sur le port ``????``
+- Frontend lancé sur le port ``3000``
+- Documentation api swagger
 ## Installation
 ### Lancer le projet
 1. Cloner le repo : <url> repo
