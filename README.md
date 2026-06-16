@@ -1,6 +1,7 @@
 # JavaRPG
 ## Si tout fonctionne
 - API lancée sur le port ``8080``
+- Documentation sur le port ``8081``
 - Base de données MongoDB atlas connectée
 - Frontend lancé sur le port ``3000``
 - Documentation api swagger
@@ -239,4 +240,3 @@ curl -X OPTIONS http://localhost:8080/api/monsters
 ```bash
 curl -X OPTIONS http://localhost:8080/api/battles
 ```
-
