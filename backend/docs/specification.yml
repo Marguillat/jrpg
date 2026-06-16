@@ -23,8 +23,168 @@ tags:
     description: Bestiary and monster management endpoints
   - name: Battles
     description: Combat and battle system endpoints
+  - name: Authentication
+    description: User authentication and session management endpoints
+
+security:
+  - bearerAuth: []
+
 
 paths:
+  /api/auth:
+    options:
+      operationId: optionsAuth
+      tags:
+        - Authentication
+      summary: Get information about the Authentication resource
+      description: Returns metadata about allowed methods and parameters for the Authentication endpoints
+      security: []
+      responses:
+        '200':
+          description: Metadata about the Authentication resource
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resource:
+                    type: string
+                    example: Authentication
+                  allowedMethods:
+                    type: array
+                    items:
+                      type: string
+                    example: ['POST', 'OPTIONS']
+                  postParameters:
+                    type: object
+                    properties:
+                      register:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: 'string (min 3 chars, unique)'
+                          password:
+                            type: string
+                            example: 'string (min 4 chars)'
+                          confirmPassword:
+                            type: string
+                            example: 'string (must match password)'
+                      login:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                            example: 'string'
+                          password:
+                            type: string
+                            example: 'string'
+
+  /api/auth/register:
+    post:
+      operationId: registerUser
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Creates a new user account with BCrypt password hashing and returns a JWT token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input (username/password too short, passwords do not match)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      operationId: loginUser
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate a user and receive a JWT token.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Missing username or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/logout:
+    post:
+      operationId: logoutUser
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Logout and cleanup on client side.
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Déconnexion réussie'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /api/characters:
     options:
       operationId: optionsCharacters
@@ -920,3 +1080,63 @@ components:
             type: string
           example:
             ["ID '507f1f77bcf86cd799439011' does not exist in the database"]
+
+    AuthRegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+        - confirmPassword
+      properties:
+        username:
+          type: string
+          minLength: 3
+          description: Unique username for the account
+          example: aragorn
+        password:
+          type: string
+          minLength: 4
+          description: Password for the account
+          example: securepassword123
+        confirmPassword:
+          type: string
+          description: Confirmation of the password (must match password)
+          example: securepassword123
+
+    AuthLoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Registered username
+          example: aragorn
+        password:
+          type: string
+          description: Account password
+          example: securepassword123
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT bearer token to authenticate future requests
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        username:
+          type: string
+          description: Username of the authenticated user
+          example: aragorn
+        expiresIn:
+          type: integer
+          description: Token lifetime in milliseconds
+          example: 86400000
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
