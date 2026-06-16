@@ -1,10 +1,10 @@
 # JavaRPG
 ## Organisation du travail
-###Groupe
+### Groupe
 - Ori
 - Erwan
 - Audrey
-###Conception
+### Conception
 Les tables et schemas utilisés dans le document ci-dessous se basent sur notre première idée. Il s'agissait d'un projet beaucoup plus ambitieux. Nous avons revu la grandeur de notre projet par la suite.
 [Disponible sur figma](https://www.figma.com/board/smCCiCaNKZOOU6q5eaq8Ws/backend---jrpg?node-id=0-1&t=1cslzpUoicAxibRy-1)
 ## Si tout fonctionne
