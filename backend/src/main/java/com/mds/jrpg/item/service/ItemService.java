@@ -4,6 +4,7 @@ import com.mds.jrpg.character.model.Character;
 import com.mds.jrpg.character.model.Stats;
 import com.mds.jrpg.character.repository.CharacterRepository;
 import com.mds.jrpg.common.exception.ResourceNotFoundException;
+import com.mds.jrpg.common.exception.UnauthorizedException;
 import com.mds.jrpg.item.dto.ItemRequestDTO;
 import com.mds.jrpg.item.dto.ItemResponseDTO;
 import com.mds.jrpg.item.model.Item;
@@ -92,10 +93,11 @@ public class ItemService {
    *
    * @param characterId The ID of the character.
    * @param itemId      The ID of the item to equip.
+   * @param ownerUsername The username of the character owner.
    * @return The updated character state (simplified logic for now).
    */
   @Transactional
-  public void equipItem(String characterId, String itemId) {
+  public void equipItem(String characterId, String itemId, String ownerUsername) {
     Character character = characterRepository
       .findById(characterId)
       .orElseThrow(() ->
@@ -103,6 +105,10 @@ public class ItemService {
           "Character not found with id: " + characterId
         )
       );
+
+    if (!character.getOwnerUsername().equals(ownerUsername)) {
+      throw new UnauthorizedException("You do not own this character.");
+    }
 
     Item item = itemRepository
       .findById(itemId)

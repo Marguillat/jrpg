@@ -4,6 +4,7 @@ import com.mds.jrpg.character.model.Character;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -20,6 +21,14 @@ public interface CharacterRepository extends MongoRepository<Character, String> 
      * @return An Optional containing the character if found, or empty if not.
      */
     Optional<Character> findByName(String name);
+
+    /**
+     * Finds characters belonging to a specific owner.
+     *
+     * @param ownerUsername The username of the owner.
+     * @return A list of characters.
+     */
+    List<Character> findByOwnerUsername(String ownerUsername);
 
     /**
      * Checks if a character with the given name already exists.

@@ -6,6 +6,7 @@ import com.mds.jrpg.character.model.Character;
 import com.mds.jrpg.character.model.Stats;
 import com.mds.jrpg.character.repository.CharacterRepository;
 import com.mds.jrpg.common.exception.ResourceNotFoundException;
+import com.mds.jrpg.common.exception.UnauthorizedException;
 import com.mds.jrpg.monster.model.Monster;
 import com.mds.jrpg.monster.repository.MonsterRepository;
 import java.util.ArrayList;
@@ -36,10 +37,11 @@ public class BattleService {
    * The battle is automated and turn-based.
    *
    * @param request The battle request containing IDs.
+   * @param ownerUsername The username of the character owner.
    * @return A summary of the battle result.
    */
   @Transactional
-  public BattleResultDTO startBattle(BattleRequestDTO request) {
+  public BattleResultDTO startBattle(BattleRequestDTO request, String ownerUsername) {
     Character character = characterRepository
       .findById(request.characterId())
       .orElseThrow(() ->
@@ -47,6 +49,10 @@ public class BattleService {
           "Character not found with id: " + request.characterId()
         )
       );
+
+    if (!character.getOwnerUsername().equals(ownerUsername)) {
+      throw new UnauthorizedException("You do not own this character.");
+    }
 
     Monster monster = monsterRepository
       .findById(request.monsterId())

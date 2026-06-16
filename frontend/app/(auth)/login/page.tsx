@@ -22,6 +22,7 @@ export default function LoginPage() {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -37,11 +38,15 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    setTimeout(() => {
-      login(data.username);
-      setIsLoading(false);
+    setError(null);
+    try {
+      await login(data.username, data.password);
       router.push('/dashboard');
-    }, 850);
+    } catch (err: any) {
+      setError(err.message || 'Nom d\'utilisateur ou mot de passe invalide.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,6 +57,12 @@ export default function LoginPage() {
           Connectez-vous pour retrouver vos héros et poursuivre l'aventure.
         </p>
       </div>
+
+      {error && (
+        <div className="p-3 mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg font-medium font-sans">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input

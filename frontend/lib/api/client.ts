@@ -11,11 +11,13 @@ export const apiClient = axios.create({
   },
 });
 
-// Intercepteur pour injecter le token d'authentification simulé
+// Intercepteur pour injecter le token d'authentification
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = localStorage.getItem('auth-token');
-    if (token && config.headers) {
+    // Ne pas injecter le token d'authentification pour les endpoints publics d'auth
+    const isAuthRoute = config.url?.startsWith('/auth/');
+    if (token && config.headers && !isAuthRoute) {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }

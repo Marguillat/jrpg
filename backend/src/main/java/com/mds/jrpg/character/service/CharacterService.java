@@ -7,6 +7,7 @@ import com.mds.jrpg.character.model.CharacterClass;
 import com.mds.jrpg.character.model.Stats;
 import com.mds.jrpg.character.repository.CharacterRepository;
 import com.mds.jrpg.common.exception.ResourceNotFoundException;
+import com.mds.jrpg.common.exception.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,15 +28,16 @@ public class CharacterService {
     }
 
     /**
-     * Creates a new character based on the provided request DTO.
+     * Creates a new character based on the provided request DTO and owner username.
      * Calculates initial stats based on the chosen class.
      *
      * @param request The character creation request.
+     * @param ownerUsername The username of the authenticated creator.
      * @return The created character as a response DTO.
      * @throws IllegalArgumentException if the name is already taken.
      */
     @Transactional
-    public CharacterResponseDTO createCharacter(CharacterRequestDTO request) {
+    public CharacterResponseDTO createCharacter(CharacterRequestDTO request, String ownerUsername) {
         if (characterRepository.existsByName(request.name())) {
             throw new IllegalArgumentException("Character name '" + request.name() + "' is already taken.");
         }
@@ -47,7 +49,8 @@ public class CharacterService {
                 request.characterClass(),
                 1, // Level 1
                 0, // 0 XP
-                initialStats
+                initialStats,
+                ownerUsername
         );
 
         Character savedCharacter = characterRepository.save(character);
@@ -55,40 +58,49 @@ public class CharacterService {
     }
 
     /**
-     * Retrieves all characters from the database.
+     * Retrieves all characters belonging to a specific owner.
      *
+     * @param ownerUsername The owner's username.
      * @return A list of character response DTOs.
      */
-    public List<CharacterResponseDTO> getAllCharacters() {
-        return characterRepository.findAll()
+    public List<CharacterResponseDTO> getAllCharacters(String ownerUsername) {
+        return characterRepository.findByOwnerUsername(ownerUsername)
                 .stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Retrieves a character by its ID.
+     * Retrieves a character by its ID, verifying ownership.
      *
      * @param id The unique identifier of the character.
+     * @param ownerUsername The owner's username.
      * @return The character response DTO.
      * @throws ResourceNotFoundException if no character is found.
+     * @throws UnauthorizedException if the character does not belong to the owner.
      */
-    public CharacterResponseDTO getCharacterById(String id) {
+    public CharacterResponseDTO getCharacterById(String id, String ownerUsername) {
         Character character = characterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Character not found with id: " + id));
+        if (!character.getOwnerUsername().equals(ownerUsername)) {
+            throw new UnauthorizedException("You do not own this character.");
+        }
         return mapToResponseDTO(character);
     }
 
     /**
-     * Deletes a character by its ID.
+     * Deletes a character by its ID, verifying ownership.
      *
      * @param id The unique identifier of the character to delete.
+     * @param ownerUsername The owner's username.
      */
-    public void deleteCharacter(String id) {
-        if (!characterRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Character not found with id: " + id);
+    public void deleteCharacter(String id, String ownerUsername) {
+        Character character = characterRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Character not found with id: " + id));
+        if (!character.getOwnerUsername().equals(ownerUsername)) {
+            throw new UnauthorizedException("You do not own this character.");
         }
-        characterRepository.deleteById(id);
+        characterRepository.delete(character);
     }
 
     /**

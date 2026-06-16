@@ -24,8 +24,9 @@ type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const login = useAuthStore((state) => state.login);
+  const registerStore = useAuthStore((state) => state.register);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -42,11 +43,15 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
-    setTimeout(() => {
-      login(data.username);
-      setIsLoading(false);
+    setError(null);
+    try {
+      await registerStore(data.username, data.password, data.confirmPassword);
       router.push('/dashboard');
-    }, 850);
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue lors de l\'inscription.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,6 +62,12 @@ export default function RegisterPage() {
           Rejoignez Aethelgard et préparez-vous à guider vos héros.
         </p>
       </div>
+
+      {error && (
+        <div className="p-3 mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg font-medium font-sans">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Input

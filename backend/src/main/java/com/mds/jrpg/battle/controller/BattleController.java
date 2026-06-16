@@ -3,6 +3,7 @@ package com.mds.jrpg.battle.controller;
 import com.mds.jrpg.battle.dto.BattleRequestDTO;
 import com.mds.jrpg.battle.dto.BattleResultDTO;
 import com.mds.jrpg.battle.service.BattleService;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,13 +29,15 @@ public class BattleController {
    * Endpoint to start an automated turn-based battle.
    *
    * @param request Contains characterId and monsterId.
+   * @param principal The authenticated user principal.
    * @return A detailed result of the combat including logs and rewards.
    */
   @PostMapping("/start")
   public ResponseEntity<BattleResultDTO> startBattle(
-    @RequestBody BattleRequestDTO request
+    @RequestBody BattleRequestDTO request,
+    Principal principal
   ) {
-    BattleResultDTO result = battleService.startBattle(request);
+    BattleResultDTO result = battleService.startBattle(request, principal.getName());
     return ResponseEntity.ok(result);
   }
 

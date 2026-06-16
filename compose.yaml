@@ -25,7 +25,9 @@ services:
     depends_on:
       - api
     environment:
-      - NEXT_PUBLIC_API_URL=http://api:8080
+      # API_URL is used server-side by the Next.js proxy (/api/proxy/[...path]/route.ts)
+      # The browser falls back to /api/proxy (same-origin) which avoids CORS issues in Docker
+      - API_URL=http://api:8080
     networks:
       - jrpg-network
 

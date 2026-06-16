@@ -3,6 +3,7 @@ package com.mds.jrpg.item.controller;
 import com.mds.jrpg.item.dto.ItemRequestDTO;
 import com.mds.jrpg.item.dto.ItemResponseDTO;
 import com.mds.jrpg.item.service.ItemService;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,14 +66,16 @@ public class ItemController {
    *
    * @param itemId      The ID of the item.
    * @param characterId The ID of the character.
+   * @param principal   The authenticated user principal.
    * @return A 200 OK status on success.
    */
   @PostMapping("/{itemId}/equip/{characterId}")
   public ResponseEntity<Void> equipItem(
     @PathVariable String itemId,
-    @PathVariable String characterId
+    @PathVariable String characterId,
+    Principal principal
   ) {
-    itemService.equipItem(characterId, itemId);
+    itemService.equipItem(characterId, itemId, principal.getName());
     return ResponseEntity.ok().build();
   }
 

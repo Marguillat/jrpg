@@ -20,16 +20,18 @@ public class Character {
     private long experience;
     private Stats stats;
     private List<String> equippedItemIds = new ArrayList<>();
+    private String ownerUsername;
 
     public Character() {}
 
-    public Character(String name, CharacterClass characterClass, int level, long experience, Stats stats) {
+    public Character(String name, CharacterClass characterClass, int level, long experience, Stats stats, String ownerUsername) {
         this.name = name;
         this.characterClass = characterClass;
         this.level = level;
         this.experience = experience;
         this.stats = stats;
         this.equippedItemIds = new ArrayList<>();
+        this.ownerUsername = ownerUsername;
     }
 
     // Getters and Setters
@@ -47,4 +49,6 @@ public class Character {
     public void setStats(Stats stats) { this.stats = stats; }
     public List<String> getEquippedItemIds() { return equippedItemIds; }
     public void setEquippedItemIds(List<String> equippedItemIds) { this.equippedItemIds = equippedItemIds; }
+    public String getOwnerUsername() { return ownerUsername; }
+    public void setOwnerUsername(String ownerUsername) { this.ownerUsername = ownerUsername; }
 }

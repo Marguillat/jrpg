@@ -3,6 +3,7 @@ package com.mds.jrpg.character.controller;
 import com.mds.jrpg.character.dto.CharacterRequestDTO;
 import com.mds.jrpg.character.dto.CharacterResponseDTO;
 import com.mds.jrpg.character.service.CharacterService;
+import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,50 +30,62 @@ public class CharacterController {
    * Endpoint to create a new character.
    *
    * @param request The character data.
+   * @param principal The authenticated user principal.
    * @return The created character with a 201 Created status.
    */
   @PostMapping
   public ResponseEntity<CharacterResponseDTO> createCharacter(
-    @RequestBody CharacterRequestDTO request
+    @RequestBody CharacterRequestDTO request,
+    Principal principal
   ) {
     CharacterResponseDTO createdCharacter = characterService.createCharacter(
-      request
+      request,
+      principal.getName()
     );
     return new ResponseEntity<>(createdCharacter, HttpStatus.CREATED);
   }
 
   /**
-   * Endpoint to retrieve all characters.
+   * Endpoint to retrieve all characters for the logged-in user.
    *
-   * @return A list of all characters.
+   * @param principal The authenticated user principal.
+   * @return A list of the user's characters.
    */
   @GetMapping
-  public ResponseEntity<List<CharacterResponseDTO>> getAllCharacters() {
-    return ResponseEntity.ok(characterService.getAllCharacters());
+  public ResponseEntity<List<CharacterResponseDTO>> getAllCharacters(
+    Principal principal
+  ) {
+    return ResponseEntity.ok(characterService.getAllCharacters(principal.getName()));
   }
 
   /**
-   * Endpoint to retrieve a specific character by ID.
+   * Endpoint to retrieve a specific character by ID, verifying ownership.
    *
    * @param id The character's unique identifier.
+   * @param principal The authenticated user principal.
    * @return The character data.
    */
   @GetMapping("/{id}")
   public ResponseEntity<CharacterResponseDTO> getCharacterById(
-    @PathVariable String id
+    @PathVariable String id,
+    Principal principal
   ) {
-    return ResponseEntity.ok(characterService.getCharacterById(id));
+    return ResponseEntity.ok(characterService.getCharacterById(id, principal.getName()));
   }
 
   /**
-   * Endpoint to delete a character.
+   * Endpoint to delete a character, verifying ownership.
    *
    * @param id The character's unique identifier.
+   * @param principal The authenticated user principal.
    * @return A 204 No Content status on success.
    */
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteCharacter(@PathVariable String id) {
-    characterService.deleteCharacter(id);
+  public ResponseEntity<Void> deleteCharacter(
+    @PathVariable String id,
+    Principal principal
+  ) {
+    characterService.deleteCharacter(id, principal.getName());
     return ResponseEntity.noContent().build();
   }
 
